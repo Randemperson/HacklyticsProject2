@@ -1,0 +1,251 @@
+/* ─── Layout ─────────────────────────────────────────────────────────────── */
+.app-layout {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #050a14;
+  color: #e8eaf0;
+  font-family: system-ui, sans-serif;
+}
+
+/* ─── Controls (left sidebar) ──────────────────────────────────────────────── */
+.controls-panel {
+  width: 260px;
+  min-width: 220px;
+  flex-shrink: 0;
+  background: rgba(10, 18, 35, 0.92);
+  border-right: 1px solid rgba(80, 140, 220, 0.2);
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+  z-index: 10;
+}
+
+.app-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+  color: #7ec8f5;
+  letter-spacing: 0.01em;
+}
+
+.app-subtitle {
+  font-size: 0.78rem;
+  color: #7a8ca0;
+  margin: -14px 0 0;
+}
+
+.control-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.section-title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #5a7a9a;
+  margin: 0;
+}
+
+/* ─── Category buttons ────────────────────────────────────────────────────── */
+.category-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.category-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: #c8d8e8;
+  padding: 8px 12px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.18s, border-color 0.18s, color 0.18s;
+}
+
+.category-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #fff;
+}
+
+.category-btn.active {
+  background: color-mix(in srgb, var(--cat-color) 25%, transparent);
+  border-color: var(--cat-color);
+  color: #fff;
+  font-weight: 600;
+}
+
+/* ─── Upload ──────────────────────────────────────────────────────────────── */
+.upload-btn {
+  display: inline-block;
+  background: rgba(100, 180, 255, 0.1);
+  border: 1px solid rgba(100, 180, 255, 0.35);
+  border-radius: 6px;
+  color: #7ec8f5;
+  padding: 7px 12px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.18s;
+}
+
+.upload-btn:hover {
+  background: rgba(100, 180, 255, 0.2);
+}
+
+.hint-text {
+  font-size: 0.72rem;
+  color: #5a7a9a;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.hint-text code {
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 3px;
+  padding: 1px 4px;
+  font-size: 0.68rem;
+  color: #90bfdf;
+}
+
+.stats-text {
+  font-size: 0.9rem;
+  color: #c8d8e8;
+  margin: 0;
+}
+
+.stat-number {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #7ec8f5;
+}
+
+/* ─── Globe (center) ──────────────────────────────────────────────────────── */
+.globe-container {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ─── Loading / Error screens ─────────────────────────────────────────────── */
+.loading-screen,
+.error-screen {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: #7ec8f5;
+  font-size: 1rem;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(126, 200, 245, 0.2);
+  border-top-color: #7ec8f5;
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Legend (right panel) ────────────────────────────────────────────────── */
+.legend-panel {
+  width: 200px;
+  min-width: 180px;
+  flex-shrink: 0;
+  background: rgba(10, 18, 35, 0.92);
+  border-left: 1px solid rgba(80, 140, 220, 0.2);
+  padding: 20px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 10;
+}
+
+.legend-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #e8eaf0;
+  margin: 0;
+}
+
+.legend-description {
+  font-size: 0.72rem;
+  color: #7a8ca0;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.legend-gradient-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.legend-gradient {
+  height: 14px;
+  border-radius: 7px;
+}
+
+.legend-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.62rem;
+  color: #5a7a9a;
+}
+
+.legend-source {
+  font-size: 0.65rem;
+  color: #3a5a7a;
+  margin: 0;
+  font-style: italic;
+  line-height: 1.4;
+}
+
+/* ─── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 700px) {
+  .app-layout {
+    flex-direction: column;
+  }
+  .controls-panel {
+    width: 100%;
+    min-width: unset;
+    border-right: none;
+    border-bottom: 1px solid rgba(80, 140, 220, 0.2);
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 10px 12px;
+    gap: 10px;
+  }
+  .globe-container {
+    min-height: 50vh;
+  }
+  .legend-panel {
+    width: 100%;
+    min-width: unset;
+    border-left: none;
+    border-top: 1px solid rgba(80, 140, 220, 0.2);
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 10px 12px;
+    gap: 10px;
+  }
+}
+
