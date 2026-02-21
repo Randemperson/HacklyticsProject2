@@ -1,0 +1,158 @@
+country,lat,lng,category,value,description
+Yemen,15.55,48.52,conflict,95,Civil war and severe humanitarian crisis
+Afghanistan,33.93,67.71,conflict,92,Active armed conflict and Taliban rule
+Palestine,31.95,35.23,conflict,91,Ongoing war and blockade in Gaza
+Syria,34.80,38.99,conflict,88,Multi-party civil conflict since 2011
+Ukraine,48.38,31.17,conflict,89,Russian invasion and active warfare
+Sudan,12.86,30.22,conflict,86,Civil war resumed in 2023
+Somalia,5.15,46.20,conflict,87,Civil war and al-Shabaab insurgency
+South Sudan,6.87,31.31,conflict,85,Recurring civil conflict and ethnic violence
+CAR,6.61,20.94,conflict,83,Armed rebel groups controlling territory
+DRC,4.34,15.33,conflict,82,Eastern Congo conflict and armed groups
+Myanmar,21.91,95.96,conflict,80,Military junta and armed resistance movement
+Burkina Faso,12.36,-1.53,conflict,80,Jihadist insurgency in Sahel region
+Haiti,18.97,-72.29,conflict,78,Gang violence and state collapse
+Mali,17.57,-3.99,conflict,78,Jihadist insurgency and military coup
+Niger,17.61,8.08,conflict,76,Military coup and Sahel instability
+Ethiopia,9.15,40.49,conflict,74,Tigray conflict and regional ethnic strife
+Nigeria,9.08,8.68,conflict,72,Boko Haram and Fulani-farmer violence
+Chad,15.45,18.73,conflict,72,Sahel instability and cross-border attacks
+Cameroon,3.85,11.50,conflict,65,Anglophone separatist crisis
+Libya,26.34,17.23,conflict,65,Ongoing civil strife and divided government
+Israel,31.05,34.85,conflict,75,Gaza war and regional tensions
+Pakistan,30.38,69.35,conflict,62,TTP attacks and tribal area conflict
+Iraq,33.22,43.68,conflict,63,ISIS remnants and political instability
+Colombia,4.57,-74.30,conflict,58,FARC dissidents and drug cartel violence
+Mexico,23.63,-102.55,conflict,55,Cartel violence and organized crime
+Mozambique,-18.66,35.53,conflict,68,Jihadist insurgency in Cabo Delgado
+Philippines,12.88,121.77,conflict,55,Mindanao armed groups
+Venezuela,6.42,-66.59,conflict,58,Political instability and gang violence
+Guinea,11.00,-10.94,conflict,60,Political instability after coup
+Bangladesh,23.68,90.36,climate,87,Flooding cyclones and sea level rise
+Philippines,12.88,121.77,climate,84,Frequent typhoons and coastal flooding
+Somalia,5.15,46.20,climate,82,Severe drought and desertification
+Niger,17.61,8.08,climate,82,Desertification and recurring drought
+Vietnam,14.06,108.28,climate,80,Flooding coastal erosion and salt intrusion
+Chad,15.45,18.73,climate,80,Lake Chad shrinkage and desertification
+Haiti,18.97,-72.29,climate,79,Hurricanes deforestation and soil erosion
+Mozambique,-18.66,35.53,climate,78,Cyclones Idai and Kenneth severe flooding
+Sudan,12.86,30.22,climate,77,Drought flooding and extreme heat
+Nepal,28.39,84.12,climate,75,Glacial lake floods and monsoon flooding
+Pakistan,30.38,69.35,climate,75,Devastating floods and glacial outbursts
+Ethiopia,9.15,40.49,climate,76,Recurring drought and desertification
+Myanmar,21.91,95.96,climate,77,Cyclones and monsoon flooding
+Iraq,33.22,43.68,climate,75,Extreme heat waves and water scarcity
+Cambodia,12.56,104.99,climate,74,Flooding drought and Mekong changes
+Malawi,-13.25,34.30,climate,74,Drought flooding and food shocks
+Madagascar,-20.28,46.87,climate,76,Cyclones drought and climate shocks
+Iran,32.43,53.69,climate,70,Severe drought and water scarcity
+India,20.59,78.96,climate,70,Heat waves flooding and coastal erosion
+Indonesia,-0.79,113.92,climate,73,Sea level rise flooding and land subsidence
+Tanzania,-6.37,34.89,climate,71,Drought flooding and locust outbreaks
+Ghana,7.95,-1.02,climate,68,Coastal erosion drought and flooding
+Kenya,-0.02,37.91,climate,68,Drought flooding and locust outbreaks
+Honduras,14.79,-86.24,climate,74,Hurricanes Eta and Iota category 4 damage
+Nigeria,9.08,8.68,climate,72,Coastal flooding and Sahel drought
+Zimbabwe,-20.01,29.15,climate,72,El Niño drought and heat
+Colombia,4.57,-74.30,climate,63,Flooding and landslides
+Guatemala,15.78,-90.23,climate,70,Drought hurricanes and landslides
+DRC,4.34,15.33,climate,68,Flooding and climate displacement
+South Africa,-30.56,22.94,climate,62,Drought Durban flooding water crisis
+Peru,-9.19,-75.02,climate,66,El Niño flooding and glacial retreat
+Yemen,15.55,48.52,food_insecurity,92,75 percent population food insecure
+Somalia,5.15,46.20,food_insecurity,90,Famine conditions in multiple regions
+Sudan,12.86,30.22,food_insecurity,86,Civil war causing mass food insecurity
+Afghanistan,33.93,67.71,food_insecurity,88,Economic collapse leaving millions hungry
+CAR,6.61,20.94,food_insecurity,85,Over half population food insecure
+South Sudan,6.87,31.31,food_insecurity,88,Persistent famine-level food crisis
+DRC,4.34,15.33,food_insecurity,84,World's largest acute food crisis
+Chad,15.45,18.73,food_insecurity,82,Chronic food crisis affecting millions
+Ethiopia,9.15,40.49,food_insecurity,82,Millions require emergency food aid
+Niger,17.61,8.08,food_insecurity,80,Recurring famine and malnutrition
+Burkina Faso,12.36,-1.53,food_insecurity,80,Conflict disrupting food production
+Madagascar,-20.28,46.87,food_insecurity,78,Climate shocks and extreme poverty
+Syria,34.80,38.99,food_insecurity,78,War and economic collapse
+Zimbabwe,-20.01,29.15,food_insecurity,76,El Niño drought impact
+Mali,17.57,-3.99,food_insecurity,76,Conflict and Sahel drought
+Haiti,18.97,-72.29,food_insecurity,80,Gang violence collapsing food systems
+Malawi,-13.25,34.30,food_insecurity,75,Climate shocks and debt crisis
+Nigeria,9.08,8.68,food_insecurity,74,Millions food insecure in northern states
+Mozambique,-18.66,35.53,food_insecurity,72,Conflict and cyclone food disruption
+Myanmar,21.91,95.96,food_insecurity,72,Military junta impacting food access
+Lebanon,33.85,35.86,food_insecurity,72,Economic collapse and hyperinflation
+Kenya,-0.02,37.91,food_insecurity,68,Drought impact on food access
+Pakistan,30.38,69.35,food_insecurity,65,Economic crisis impact on food
+Venezuela,6.42,-66.59,food_insecurity,70,Economic collapse and food shortages
+Guatemala,15.78,-90.23,food_insecurity,65,Chronic malnutrition in rural areas
+Honduras,14.79,-86.24,food_insecurity,64,Structural poverty and food access
+Philippines,12.88,121.77,food_insecurity,58,Poverty and food access in rural areas
+Iraq,33.22,43.68,food_insecurity,62,Inequality and conflict zones
+Cambodia,12.56,104.99,food_insecurity,60,Rural poverty and food access gaps
+Palestine,31.95,35.23,food_insecurity,85,Blockade severely limiting food access
+South Sudan,6.87,31.31,poverty,95,82 percent live below the poverty line
+Madagascar,-20.28,46.87,poverty,92,80 percent of population in poverty
+DRC,4.34,15.33,poverty,90,73 percent live below poverty line
+Malawi,-13.25,34.30,poverty,88,70 percent below two dollars per day
+Niger,17.61,8.08,poverty,85,40 percent in extreme poverty
+Mozambique,-18.66,35.53,poverty,86,63 percent in poverty
+CAR,6.61,20.94,poverty,84,Critical poverty and no safety nets
+Guinea-Bissau,11.80,-15.18,poverty,80,Chronic extreme poverty
+Somalia,5.15,46.20,poverty,80,Widespread poverty and no formal economy
+Chad,15.45,18.73,poverty,82,42 percent in extreme poverty
+Burkina Faso,12.36,-1.53,poverty,78,43 percent below poverty line
+Mali,17.57,-3.99,poverty,76,50 percent below poverty line
+Zimbabwe,-20.01,29.15,poverty,74,40 percent in extreme poverty
+Ethiopia,9.15,40.49,poverty,74,Conflict and structural poverty
+Afghanistan,33.93,67.71,poverty,82,Economic collapse under Taliban
+Sierra Leone,8.46,-11.78,poverty,78,60 percent in poverty
+Haiti,18.97,-72.29,poverty,76,Economic collapse and gang control
+Yemen,15.55,48.52,poverty,78,War has destroyed the economy
+Syria,34.80,38.99,poverty,80,War poverty and mass displacement
+Tanzania,-6.37,34.89,poverty,68,Improving but still high poverty
+Nigeria,9.08,8.68,poverty,65,40 percent live in poverty
+Myanmar,21.91,95.96,poverty,68,Military rule worsening poverty
+Kenya,-0.02,37.91,poverty,62,Inequality and urban poverty
+Pakistan,30.38,69.35,poverty,60,35 percent in poverty
+Bangladesh,23.68,90.36,poverty,58,Progress but still high relative poverty
+India,20.59,78.96,poverty,55,Poverty reducing but massive scale
+Guatemala,15.78,-90.23,poverty,64,59 percent in poverty
+Honduras,14.79,-86.24,poverty,62,48 percent in poverty
+Cambodia,12.56,104.99,poverty,65,Rural poverty still widespread
+Laos,17.97,102.64,poverty,62,Rural poverty persists
+Papua New Guinea,-6.31,143.96,poverty,65,Rural poverty in remote areas
+Philippines,12.88,121.77,poverty,55,Urban-rural inequality
+Bolivia,-16.29,-63.59,poverty,55,Progress but structural inequality
+DRC,4.34,15.33,disease,90,HIV malaria Ebola and cholera burden
+Chad,15.45,18.73,disease,88,Multiple endemic diseases and poor health systems
+CAR,6.61,20.94,disease,86,HIV malaria and neglected tropical diseases
+South Sudan,6.87,31.31,disease,85,Malaria cholera HIV and conflict health impact
+Niger,17.61,8.08,disease,84,Malaria and high child mortality
+Sierra Leone,8.46,-11.78,disease,84,Malaria Lassa fever and cholera
+Burkina Faso,12.36,-1.53,disease,83,Malaria meningitis and Ebola risk
+Mali,17.57,-3.99,disease,82,Malaria meningitis and conflict health impact
+Nigeria,9.08,8.68,disease,82,Malaria deaths highest globally plus HIV
+Mozambique,-18.66,35.53,disease,80,Highest HIV rates globally and malaria
+Somalia,5.15,46.20,disease,78,Cholera measles and malaria outbreaks
+Zambia,-13.13,27.85,disease,76,High HIV rate and malaria burden
+Malawi,-13.25,34.30,disease,76,HIV prevalence and malaria
+Guinea,11.00,-10.94,disease,75,Malaria cholera and Ebola outbreaks
+Ethiopia,9.15,40.49,disease,75,Malaria tuberculosis and conflict health gaps
+Uganda,1.37,32.29,disease,74,HIV malaria and tuberculosis
+Zimbabwe,-20.01,29.15,disease,70,HIV economic collapse impact on health
+Papua New Guinea,-6.31,143.96,disease,70,Malaria tuberculosis and remote health access
+Kenya,-0.02,37.91,disease,65,Malaria HIV and dengue fever
+Afghanistan,33.93,67.71,disease,72,Tuberculosis malaria and conflict health impact
+Haiti,18.97,-72.29,disease,72,Cholera malaria and healthcare collapse
+Philippines,12.88,121.77,disease,65,Dengue fever and tuberculosis
+Myanmar,21.91,95.96,disease,68,Malaria and multidrug-resistant tuberculosis
+Indonesia,-0.79,113.92,disease,62,Malaria TB in eastern regions and dengue
+Cambodia,12.56,104.99,disease,62,Malaria dengue and liver fluke disease
+Venezuela,6.42,-66.59,disease,65,Malaria measles resurgence and hospital collapse
+Pakistan,30.38,69.35,disease,64,Tuberculosis and polio remnants
+Bangladesh,23.68,90.36,disease,62,Dengue fever and cholera risk
+India,20.59,78.96,disease,60,Tuberculosis burden snakebites and malaria
+Tanzania,-6.37,34.89,disease,72,Malaria HIV and maternal mortality
+Madagascar,-20.28,46.87,disease,74,Malaria plague and poor health infrastructure
+Sudan,12.86,30.22,disease,76,Cholera measles and conflict-disrupted health
+Yemen,15.55,48.52,disease,80,Cholera epidemic and healthcare collapse
+Syria,34.80,38.99,disease,70,War-damaged healthcare and disease resurgence
