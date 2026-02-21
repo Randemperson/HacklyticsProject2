@@ -16,6 +16,8 @@ An interactive 3D globe that visualizes current global challenges as a heatmap, 
 ## Getting Started
 
 ```bash
+git clone https://github.com/Randemperson/HacklyticsProject2.git
+cd HacklyticsProject2
 npm install
 npm run dev
 ```
