@@ -9,7 +9,32 @@ const CATEGORIES = [
   { key: 'disease',         label: 'Disease',       color: '#30a860' },
 ];
 
-const FUNDING_CATEGORY = { key: 'funding', label: 'Funding', color: '#2ecc71' };
+const SPECIAL_CATEGORIES = [
+  {
+    key: 'funding',
+    label: 'Funding',
+    color: '#2ecc71',
+    tag: '$',
+    tagColor: 'rgba(46,204,113,0.45)',
+    tagBg: 'rgba(46,204,113,0.08)',
+    dividerColor: 'rgba(46,204,113,0.1)',
+    hoverBorder: 'rgba(46,204,113,0.35)',
+    idleText: '#4a9a6a',
+    idleDot: 'rgba(46,204,113,0.25)',
+  },
+  {
+    key: 'disparity',
+    label: 'Disparity',
+    color: '#9b6dff',
+    tag: '△',
+    tagColor: 'rgba(155,109,255,0.45)',
+    tagBg: 'rgba(155,109,255,0.08)',
+    dividerColor: 'rgba(155,109,255,0.1)',
+    hoverBorder: 'rgba(155,109,255,0.35)',
+    idleText: '#7a5ab8',
+    idleDot: 'rgba(155,109,255,0.25)',
+  },
+];
 
 export default function Controls({ category, onCategoryChange, onDataLoad, rowCount }) {
   const [hoveredKey, setHoveredKey] = useState(null);
@@ -62,13 +87,12 @@ export default function Controls({ category, onCategoryChange, onDataLoad, rowCo
     );
   }
 
-  function renderFundingButton() {
-    const cat    = FUNDING_CATEGORY;
+  function renderSpecialButton(cat) {
     const active  = category === cat.key;
     const hovered = hoveredKey === cat.key;
     let borderLeftColor = 'transparent';
     if (active) borderLeftColor = cat.color;
-    else if (hovered) borderLeftColor = 'rgba(46,204,113,0.35)';
+    else if (hovered) borderLeftColor = cat.hoverBorder;
 
     return (
         <button
@@ -81,19 +105,19 @@ export default function Controls({ category, onCategoryChange, onDataLoad, rowCo
               borderLeftColor,
               background: active
                   ? `linear-gradient(90deg, ${cat.color}22 0%, ${cat.color}08 100%)`
-                  : 'rgba(46,204,113,0.03)',
-              color: active ? '#f0f4f8' : '#4a9a6a',
+                  : `${cat.color}08`,
+              color: active ? '#f0f4f8' : cat.idleText,
             }}
         >
         <span style={{
           ...s.catIndicator,
-          background: active ? cat.color : 'rgba(46,204,113,0.25)',
+          background: active ? cat.color : cat.idleDot,
           boxShadow: active ? `0 0 6px ${cat.color}88` : 'none',
         }} />
           <span style={s.catText}>{cat.label}</span>
           {active
               ? <span style={s.activeTag}>SELECTED</span>
-              : <span style={s.fundingTag}>$</span>
+              : <span style={{ ...s.specialTag, color: cat.tagColor, background: cat.tagBg }}>{cat.tag}</span>
           }
         </button>
     );
@@ -116,10 +140,12 @@ export default function Controls({ category, onCategoryChange, onDataLoad, rowCo
           <div style={s.label}>VIEW BY</div>
           <div style={s.categoryList}>
             {CATEGORIES.map(renderCatButton)}
-
-            {/* Funding — separated with a subtle divider */}
-            <div style={s.fundingDivider} />
-            {renderFundingButton()}
+            {SPECIAL_CATEGORIES.map((cat) => (
+                <div key={cat.key}>
+                  <div style={{ height: '1px', background: cat.dividerColor, margin: '4px 4px' }} />
+                  {renderSpecialButton(cat)}
+                </div>
+            ))}
           </div>
           {category === null && (
               <p style={s.overallNote}>Showing overall average severity</p>
@@ -190,13 +216,8 @@ const s = {
     lineHeight: 1,
     fontFamily: "'DM Sans', 'Helvetica Neue', sans-serif",
   },
-  wordmarkVide: {
-    color: '#dce8f0',
-  },
-  wordmarkPax: {
-    color: '#3a8fd4',
-    marginLeft: '1px',
-  },
+  wordmarkVide: { color: '#dce8f0' },
+  wordmarkPax:  { color: '#3a8fd4', marginLeft: '1px' },
   wordmarkSub: {
     fontSize: '0.5rem',
     letterSpacing: '0.2em',
@@ -254,9 +275,7 @@ const s = {
     flexShrink: 0,
     transition: 'all 0.15s',
   },
-  catText: {
-    flex: 1,
-  },
+  catText: { flex: 1 },
   activeTag: {
     fontSize: '0.5rem',
     fontWeight: 700,
@@ -266,17 +285,10 @@ const s = {
     borderRadius: '3px',
     padding: '2px 5px',
   },
-  fundingDivider: {
-    height: '1px',
-    background: 'rgba(46,204,113,0.1)',
-    margin: '4px 4px',
-  },
-  fundingTag: {
+  specialTag: {
     fontSize: '0.6rem',
     fontWeight: 700,
     letterSpacing: '0.05em',
-    color: 'rgba(46,204,113,0.45)',
-    background: 'rgba(46,204,113,0.08)',
     borderRadius: '3px',
     padding: '2px 6px',
   },

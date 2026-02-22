@@ -8,9 +8,15 @@ const SEVERITY_STOPS = [
 ];
 
 const FUNDING_STOPS = [
-    { pct: 0,   color: 'rgba(20,40,70,0.8)'    },
-    { pct: 50,  color: 'rgba(0,180,100,0.9)'   },
-    { pct: 100, color: 'rgba(0,220,60,1)'      },
+    { pct: 0,   color: 'rgba(20,40,70,0.8)'  },
+    { pct: 50,  color: 'rgba(0,180,100,0.9)' },
+    { pct: 100, color: 'rgba(0,220,60,1)'    },
+];
+
+const DISPARITY_STOPS = [
+    { pct: 0,   color: 'rgba(20,40,70,0.8)'     },
+    { pct: 50,  color: 'rgba(130,80,220,0.9)'   },
+    { pct: 100, color: 'rgba(155,109,255,1)'    },
 ];
 
 const CATEGORY_INFO = {
@@ -44,6 +50,11 @@ const CATEGORY_INFO = {
         description: 'Reflects total humanitarian aid funding received relative to assessed need.',
         source: 'OCHA FTS 2024',
     },
+    disparity: {
+        title: 'Inequality & Disparity',
+        description: 'Measures inequality in income, access to services, gender, and regional development gaps.',
+        source: 'UNDP Human Development Report 2024',
+    },
     overall: {
         title: 'Overall Severity',
         description: 'Average severity across all crisis categories — conflict, climate, food, poverty, and disease.',
@@ -51,23 +62,37 @@ const CATEGORY_INFO = {
     },
 };
 
+function getConfig(category) {
+    if (category === 'funding') return {
+        stops: FUNDING_STOPS,
+        accent: '#2ecc71',
+        typeLabel: 'FUNDING',
+        scaleLabels: ['NONE', 'LOW', 'MODERATE', 'HIGH'],
+    };
+    if (category === 'disparity') return {
+        stops: DISPARITY_STOPS,
+        accent: '#9b6dff',
+        typeLabel: 'DISPARITY',
+        scaleLabels: ['LOW', 'MODERATE', 'HIGH', 'SEVERE'],
+    };
+    return {
+        stops: SEVERITY_STOPS,
+        accent: '#3a8fd4',
+        typeLabel: category ? 'CATEGORY' : 'COMPOSITE',
+        scaleLabels: ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'],
+    };
+}
+
 export default function Legend({ category }) {
     const [open, setOpen] = useState(false);
 
-    const key      = category || 'overall';
-    const info     = CATEGORY_INFO[key] || CATEGORY_INFO.overall;
-    const isFunding = key === 'funding';
-    const stops    = isFunding ? FUNDING_STOPS : SEVERITY_STOPS;
+    const key    = category || 'overall';
+    const info   = CATEGORY_INFO[key] || CATEGORY_INFO.overall;
+    const config = getConfig(category);
 
-    const gradientCss = `linear-gradient(to right, ${stops.map(
+    const gradientCss = `linear-gradient(to right, ${config.stops.map(
         (s) => `${s.color} ${s.pct}%`
     ).join(', ')})`;
-
-    const accentColor = isFunding ? '#2ecc71' : '#3a8fd4';
-
-    const scaleLabels = isFunding
-        ? ['NONE', 'LOW', 'MODERATE', 'HIGH']
-        : ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
 
     return (
         <div style={{
@@ -84,7 +109,7 @@ export default function Legend({ category }) {
             {open && (
                 <div style={{
                     background: 'rgba(6,13,26,0.97)',
-                    border: `1px solid ${accentColor}18`,
+                    border: `1px solid ${config.accent}20`,
                     borderRadius: '10px',
                     padding: '16px 18px',
                     width: '230px',
@@ -93,15 +118,16 @@ export default function Legend({ category }) {
                     gap: '10px',
                     boxShadow: '0 12px 40px rgba(0,0,0,0.7)',
                 }}>
+
                     <div>
                         <div style={{
                             fontSize: '0.5rem',
                             letterSpacing: '0.2em',
-                            color: isFunding ? 'rgba(46,204,113,0.5)' : '#2a4a62',
+                            color: `${config.accent}80`,
                             fontWeight: 700,
                             marginBottom: '5px',
                         }}>
-                            {isFunding ? 'FUNDING' : category ? 'CATEGORY' : 'COMPOSITE'}
+                            {config.typeLabel}
                         </div>
                         <div style={{
                             fontSize: '0.88rem',
@@ -123,16 +149,17 @@ export default function Legend({ category }) {
                             display: 'flex',
                             justifyContent: 'space-between',
                             fontSize: '0.58rem',
-                            color: isFunding ? 'rgba(46,204,113,0.4)' : '#2a4a62',
+                            color: `${config.accent}60`,
                             letterSpacing: '0.04em',
                         }}>
-                            {scaleLabels.map((l) => <span key={l}>{l}</span>)}
+                            {config.scaleLabels.map((l) => <span key={l}>{l}</span>)}
                         </div>
                     </div>
 
                     <div style={{ fontSize: '0.58rem', color: '#1e3a50', fontStyle: 'italic' }}>
                         {info.source}
                     </div>
+
                 </div>
             )}
 
@@ -140,9 +167,9 @@ export default function Legend({ category }) {
                 onClick={() => setOpen((o) => !o)}
                 style={{
                     background: 'rgba(6,13,26,0.97)',
-                    border: `1px solid ${open ? accentColor + '40' : 'rgba(255,255,255,0.08)'}`,
+                    border: `1px solid ${open ? config.accent + '40' : 'rgba(255,255,255,0.08)'}`,
                     borderRadius: '6px',
-                    color: open ? accentColor : '#4a7a9a',
+                    color: open ? config.accent : '#4a7a9a',
                     padding: '7px 16px',
                     fontSize: '0.7rem',
                     fontWeight: 700,

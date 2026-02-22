@@ -6,8 +6,9 @@ const CATEGORIES = [
     { key: 'food_insecurity', label: 'Food Insecurity', color: '#e07830' },
     { key: 'poverty',         label: 'Poverty',         color: '#a055c0' },
     { key: 'disease',         label: 'Disease Burden',  color: '#30a860' },
-    { key: 'funding',         label: 'Funding',         color: '#2ecc71' },
 ];
+
+const CRISIS_KEYS = CATEGORIES.map(c => c.key);
 
 function severityLabel(t) {
     if (t === null || t === undefined) return { text: 'No Data', color: '#7a8ca0' };
@@ -46,29 +47,19 @@ function getRelevantPolygons(geometry) {
     if (geometry.type === 'Polygon') return [geometry.coordinates[0]];
     if (geometry.type === 'MultiPolygon') {
         const outerRings = geometry.coordinates.map(poly => poly[0]);
-
-        // Find largest polygon
         let largest = outerRings[0], largestArea = 0;
         for (const ring of outerRings) {
             const area = polyBboxArea(ring);
             if (area > largestArea) { largestArea = area; largest = ring; }
         }
-
-        // Detect archipelagos: if the full country spans more than 2x the width
-        // of its largest island, treat as archipelago and show all major polygons.
-        // This handles Indonesia, Philippines, Japan, etc.
         const fullBounds = getBounds(outerRings.flat());
         const fullLngRange = fullBounds.maxLng - fullBounds.minLng;
         const mb = getBounds(largest);
         const largestLngRange = mb.maxLng - mb.minLng;
-
         if (fullLngRange > largestLngRange * 2) {
-            // Archipelago: include all polygons above 0.1% of largest area (skip tiny specks)
             const minArea = largestArea * 0.001;
             return outerRings.filter(ring => polyBboxArea(ring) >= minArea);
         }
-
-        // Compact country (USA, France, etc.): filter to mainland bounding box
         const padLng = (mb.maxLng - mb.minLng) * 0.4;
         const padLat = (mb.maxLat - mb.minLat) * 0.4;
         const exp = { minLng: mb.minLng - padLng, maxLng: mb.maxLng + padLng, minLat: mb.minLat - padLat, maxLat: mb.maxLat + padLat };
@@ -102,36 +93,18 @@ function ringToPath(ring, bounds, svgW, svgH, padding) {
     }).join(' ') + ' Z';
 }
 
-// ─── Silhouette + Heatmap ─────────────────────────────────────────────────────
+// ─── Silhouette (no heatmap) ──────────────────────────────────────────────────
 
-function CountrySilhouette({ geometry, severity, heatPoints }) {
+function CountrySilhouette({ geometry, severity }) {
     const SVG_W = 500, SVG_H = 440, PAD = 30;
 
-    const { paths, bounds } = useMemo(() => {
-        if (!geometry) return { paths: [], bounds: null };
+    const { paths } = useMemo(() => {
+        if (!geometry) return { paths: [] };
         const rings = getRelevantPolygons(geometry);
-        if (!rings.length) return { paths: [], bounds: null };
+        if (!rings.length) return { paths: [] };
         const b = getBounds(rings.flat());
-        return { paths: rings.map(r => ringToPath(r, b, SVG_W, SVG_H, PAD)), bounds: b };
+        return { paths: rings.map(r => ringToPath(r, b, SVG_W, SVG_H, PAD)) };
     }, [geometry]);
-
-    const projectedHeat = useMemo(() => {
-        if (!bounds || !heatPoints?.length) return [];
-        const padLng = (bounds.maxLng - bounds.minLng) * 0.25;
-        const padLat = (bounds.maxLat - bounds.minLat) * 0.25;
-        return heatPoints
-            .filter(pt => {
-                const lng = parseFloat(pt.lng), lat = parseFloat(pt.lat);
-                return lng >= bounds.minLng - padLng && lng <= bounds.maxLng + padLng &&
-                    lat >= bounds.minLat - padLat && lat <= bounds.maxLat + padLat;
-            })
-            .map(pt => {
-                const [x, y] = projectCoord(parseFloat(pt.lng), parseFloat(pt.lat), bounds, SVG_W, SVG_H, PAD);
-                const val = Math.min(1, Math.max(0, parseFloat(pt.value) / 100));
-                const cat = CATEGORIES.find(c => c.key === pt.category);
-                return { x, y, val, color: cat?.color ?? '#ffffff' };
-            });
-    }, [heatPoints, bounds]);
 
     const t = severity ?? 0;
     const baseColor = t > 0.75 ? '#d20000' : t > 0.5 ? '#f05000' : t > 0.25 ? '#dcc800' : t > 0.1 ? '#14a0a0' : '#142880';
@@ -145,33 +118,17 @@ function CountrySilhouette({ geometry, severity, heatPoints }) {
                 </radialGradient>
                 <filter id="glowF"    x="-15%" y="-15%" width="130%" height="130%"><feGaussianBlur stdDeviation="3.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
                 <filter id="ambientF" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="20"/></filter>
-                <filter id="heatF"    x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="16"/></filter>
-                <filter id="dotF"     x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-                <clipPath id="countryClip">{paths.map((d, i) => <path key={i} d={d}/>)}</clipPath>
                 <style>{`
           @keyframes silReveal { from{opacity:0;transform:scale(0.93) translateY(10px)} to{opacity:1;transform:scale(1) translateY(0)} }
-          @keyframes heatReveal { from{opacity:0} to{opacity:1} }
-          .sil-g  { transform-origin:50% 50%; animation:silReveal  0.75s cubic-bezier(0.22,1,0.36,1) both; }
-          .heat-g { animation:heatReveal 0.5s ease 0.55s both; }
+          .sil-g { transform-origin:50% 50%; animation:silReveal 0.75s cubic-bezier(0.22,1,0.36,1) both; }
         `}</style>
             </defs>
-
             <g filter="url(#ambientF)" opacity="0.3">
                 {paths.map((d,i) => <path key={i} d={d} fill={baseColor}/>)}
             </g>
             <g className="sil-g">
                 {paths.map((d,i) => <path key={i} d={d} fill="url(#silGrad)" stroke={baseColor} strokeWidth="1.5" strokeOpacity="0.55" filter="url(#glowF)"/>)}
             </g>
-            {projectedHeat.length > 0 && (
-                <g className="heat-g">
-                    <g clipPath="url(#countryClip)" filter="url(#heatF)" opacity="0.8">
-                        {projectedHeat.map((pt, i) => <circle key={i} cx={pt.x} cy={pt.y} r={24 + pt.val * 26} fill={pt.color} opacity={0.22 + pt.val * 0.5}/>)}
-                    </g>
-                    <g clipPath="url(#countryClip)">
-                        {projectedHeat.map((pt, i) => <circle key={i} cx={pt.x} cy={pt.y} r={2.5 + pt.val * 3} fill={pt.color} opacity={0.75 + pt.val * 0.25} filter="url(#dotF)"/>)}
-                    </g>
-                </g>
-            )}
         </svg>
     );
 }
@@ -227,37 +184,61 @@ const sc = {
     sub:   { fontSize:'0.62rem', color:'#3a5a70', fontFamily:"'DM Sans',sans-serif" },
 };
 
-function HeatLegend({ activeCategories }) {
-    if (!activeCategories.length) return null;
+// ─── Score Block ──────────────────────────────────────────────────────────────
+
+function BigScoreBlock({ label, score, color, sub, prominent }) {
     return (
-        <div style={hl.wrap}>
-            <div style={hl.title}>Heatmap Legend</div>
-            <div style={hl.items}>
-                {activeCategories.map(cat => (
-                    <div key={cat.key} style={hl.item}>
-                        <div style={{ ...hl.dot, background:cat.color, boxShadow:`0 0 5px ${cat.color}` }}/>
-                        <span style={hl.label}>{cat.label}</span>
-                    </div>
-                ))}
+        <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '20px',
+            padding: prominent ? '16px' : '12px 16px',
+            background: prominent ? 'rgba(255,255,255,0.02)' : 'transparent',
+            border: prominent ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(255,255,255,0.03)',
+            borderRadius: '10px',
+            flexWrap: 'wrap',
+            opacity: prominent ? 1 : 0.7,
+        }}>
+            <div style={{
+                fontSize: prominent ? '3.5rem' : '2.2rem',
+                fontWeight: 800,
+                lineHeight: 1,
+                letterSpacing: '-0.04em',
+                color,
+            }}>
+                {score !== null && score !== undefined ? Math.round(score) : '—'}
+            </div>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                <div style={{
+                    fontSize: prominent ? '1rem' : '0.75rem',
+                    fontWeight: 700,
+                    letterSpacing: '0.04em',
+                    textTransform: 'uppercase',
+                    color,
+                }}>
+                    {label}
+                </div>
+                <div style={{ fontSize: '0.65rem', color: '#2a4a62', letterSpacing: '0.08em' }}>{sub}</div>
+            </div>
+            <div style={{ width: '100%', height: prominent ? '5px' : '3px', background: 'rgba(255,255,255,0.04)', borderRadius: '3px', overflow: 'hidden' }}>
+                <div style={{
+                    height: '100%',
+                    borderRadius: '3px',
+                    width: score !== null && score !== undefined ? `${score}%` : '0%',
+                    background: `linear-gradient(90deg,${color}66,${color})`,
+                    boxShadow: `0 0 12px ${color}55`,
+                    transition: 'width 1s cubic-bezier(0.22,1,0.36,1) 0.3s',
+                }}/>
             </div>
         </div>
     );
 }
-const hl = {
-    wrap:  { display:'flex', flexDirection:'column', gap:'6px', padding:'10px 14px', background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.05)', borderRadius:'8px' },
-    title: { fontSize:'0.55rem', fontWeight:700, letterSpacing:'0.2em', color:'#2a4a62', textTransform:'uppercase' },
-    items: { display:'flex', flexWrap:'wrap', gap:'8px 14px' },
-    item:  { display:'flex', alignItems:'center', gap:'6px' },
-    dot:   { width:'7px', height:'7px', borderRadius:'50%', flexShrink:0 },
-    label: { fontSize:'0.65rem', color:'#5a8aa8', fontFamily:"'DM Sans',sans-serif" },
-};
 
 // ─── Main Panel ───────────────────────────────────────────────────────────────
 
 const ANIM_MS = 380;
 
 export default function CountryPanel({ country, onClose, allData }) {
-    // ── ALL HOOKS MUST COME FIRST — before any conditional returns ──
     const [phase, setPhase] = useState('hidden');
     const timerRef = useRef(null);
 
@@ -283,27 +264,14 @@ export default function CountryPanel({ country, onClose, allData }) {
         if (e.target === e.currentTarget) handleClose();
     }, [handleClose]);
 
-    // Derived data — must also be hooks, called unconditionally
-    const { categoryValues, heatPoints, activeCategories } = useMemo(() => {
+    const { categoryValues } = useMemo(() => {
         const acc = {};
-        const pts = [];
-        const activeCatKeys = new Set();
-
         const norm = (s) => (s ?? '').toLowerCase().trim().replace(/\s+/g, ' ');
         const countryNorm = norm(country?.name);
         const isoNorm     = norm(country?.iso);
-
-        // Use pre-filtered rows if passed directly (preferred), otherwise search allData
         const rowsToSearch = country?.rows ?? allData ?? [];
 
-        if (!country?.rows && allData?.length) {
-            // Debug: log the first few country names so mismatches are easy to spot
-            const sample = [...new Set(allData.slice(0, 200).map(r => r.country ?? r.Country ?? ''))].slice(0, 8);
-            console.log('[CountryPanel] Looking for:', JSON.stringify(country?.name), '| Sample CSV names:', sample);
-        }
-
         for (const row of rowsToSearch) {
-            // If using pre-filtered rows, skip the name check entirely
             if (!country?.rows) {
                 const rowNorm = norm(row.country ?? row.Country ?? row.name ?? row.COUNTRY ?? '');
                 const rowIso  = norm(row.iso ?? row.ISO ?? row.iso_code ?? row.ISO_A2 ?? row.ISO_A3 ?? '');
@@ -311,7 +279,12 @@ export default function CountryPanel({ country, onClose, allData }) {
                 const isoMatch  = isoNorm && rowIso && rowIso === isoNorm;
                 if (!nameMatch && !isoMatch) continue;
             }
-            const cat = CATEGORIES.find(c => c.key === norm(row.category ?? row.Category ?? row.CATEGORY ?? ''));
+            const allCats = [
+                ...CATEGORIES,
+                { key: 'funding',   color: '#2ecc71' },
+                { key: 'disparity', color: '#9b6dff' },
+            ];
+            const cat = allCats.find(c => c.key === norm(row.category ?? row.Category ?? row.CATEGORY ?? ''));
             if (!cat) continue;
             const v = parseFloat(row.value);
             if (!isNaN(v)) {
@@ -319,23 +292,15 @@ export default function CountryPanel({ country, onClose, allData }) {
                 acc[cat.key].sum += v;
                 acc[cat.key].n   += 1;
             }
-            if (row.lat && row.lng) {
-                pts.push({ lat: row.lat, lng: row.lng, value: row.value, category: row.category });
-                activeCatKeys.add(cat.key);
-            }
         }
+
         const vals = {};
-        for (const cat of CATEGORIES) {
-            vals[cat.key] = acc[cat.key] ? Math.round(acc[cat.key].sum / acc[cat.key].n) : null;
+        for (const key of [...CRISIS_KEYS, 'funding', 'disparity']) {
+            vals[key] = acc[key] ? Math.round(acc[key].sum / acc[key].n) : null;
         }
-        return {
-            categoryValues: vals,
-            heatPoints: pts,
-            activeCategories: CATEGORIES.filter(c => activeCatKeys.has(c.key)),
-        };
+        return { categoryValues: vals };
     }, [allData, country?.name]);
 
-    // ── NOW it's safe to conditionally render nothing ──
     if (!country || phase === 'hidden') return null;
 
     const show    = phase === 'visible';
@@ -344,17 +309,17 @@ export default function CountryPanel({ country, onClose, allData }) {
     const slideL  = show ? '0px' : '-40px';
     const slideR  = show ? '0px' : '40px';
 
-    const population  = country.properties?.POP_EST    ? Number(country.properties.POP_EST).toLocaleString()    : 'N/A';
-    const area        = country.properties?.AREA_KM2   ? `${Number(country.properties.AREA_KM2).toLocaleString()} km²` : country.properties?.area ? `${Number(country.properties.area).toLocaleString()} km²` : 'N/A';
-    const gdp         = country.properties?.GDP_MD_EST ? `$${Number(country.properties.GDP_MD_EST).toLocaleString()}M` : 'N/A';
-    const region      = country.properties?.REGION_WB  || country.properties?.SUBREGION || 'N/A';
-    const incomeGroup = country.properties?.INCOME_GRP || 'N/A';
-    const economy     = country.properties?.ECONOMY;
+    const population = country.properties?.POP_EST    ? Number(country.properties.POP_EST).toLocaleString()    : 'N/A';
+    const area       = country.properties?.AREA_KM2   ? `${Number(country.properties.AREA_KM2).toLocaleString()} km²` : country.properties?.area ? `${Number(country.properties.area).toLocaleString()} km²` : 'N/A';
+    const gdp        = country.properties?.GDP_MD_EST ? `$${Number(country.properties.GDP_MD_EST).toLocaleString()}M` : 'N/A';
+    const region     = country.properties?.REGION_WB  || country.properties?.SUBREGION || 'N/A';
 
-    // Composite = average across all 5 categories, missing data counts as 0
-    const overallSev = CATEGORIES.reduce((sum, c) => sum + (categoryValues[c.key] ?? 0), 0) / CATEGORIES.length / 100;
+    const overallSev   = CRISIS_KEYS.reduce((sum, k) => sum + (categoryValues[k] ?? 0), 0) / CRISIS_KEYS.length;
+    const disparityVal = categoryValues['disparity'];
+    const fundingVal   = categoryValues['funding'];
 
-    const { text: sevText, color: sevColor } = severityLabel(overallSev);
+    const { text: sevText, color: sevColor } = severityLabel(overallSev / 100);
+    const disparityColor = '#9b6dff';
     const trans = `opacity ${ANIM_MS}ms ease, transform ${ANIM_MS}ms cubic-bezier(0.22,1,0.36,1)`;
 
     return (
@@ -366,7 +331,6 @@ export default function CountryPanel({ country, onClose, allData }) {
         }
       `}</style>
 
-            {/* Backdrop */}
             <div
                 onClick={handleBackdropClick}
                 style={{ ...p.overlay, opacity, transition:`opacity ${ANIM_MS}ms ease`, pointerEvents: exiting ? 'none' : 'auto' }}
@@ -384,18 +348,13 @@ export default function CountryPanel({ country, onClose, allData }) {
                     </div>
 
                     <div style={p.silhouetteContainer}>
-                        <CountrySilhouette geometry={country.geometry} severity={overallSev} heatPoints={heatPoints}/>
+                        <CountrySilhouette geometry={country.geometry} severity={overallSev / 100} />
                     </div>
 
-                    {activeCategories.length > 0 && (
-                        <div style={{ width:'100%', maxWidth:'420px' }}>
-                            <HeatLegend activeCategories={activeCategories}/>
-                        </div>
-                    )}
                     <div style={p.regionTag}>{region}</div>
                 </div>
 
-                {/* RIGHT — details (stopPropagation prevents backdrop close) */}
+                {/* RIGHT — details */}
                 <div onClick={e => e.stopPropagation()} style={{ ...p.right, opacity, transform:`translateX(${slideR})`, transition: trans }}>
                     <button style={p.closeBtn} onClick={handleClose}>✕</button>
                     <div style={p.rightScroll}>
@@ -405,34 +364,39 @@ export default function CountryPanel({ country, onClose, allData }) {
                             <StatCard label="Population" value={population} />
                             <StatCard label="GDP"        value={gdp}        />
                             <StatCard label="Area"       value={area}       />
-                            <StatCard label="Funding"    value={
-                                categoryValues['funding'] !== null && categoryValues['funding'] !== undefined
-                                    ? `${categoryValues['funding']}/100`
-                                    : 'N/A'
-                            } />
+                            <StatCard
+                                label="Funding"
+                                value={fundingVal !== null ? `${fundingVal}/100` : 'N/A'}
+                            />
                         </div>
 
                         <div style={p.divider}/>
                         <div style={p.sectionLabel}>Crisis Indices</div>
                         <div style={p.barsBlock}>
-                            {CATEGORIES.filter(cat => cat.key !== 'funding').map((cat, i) => (
+                            {CATEGORIES.map((cat, i) => (
                                 <SeverityBar key={cat.key} label={cat.label} value={categoryValues[cat.key]} color={cat.color} delay={i * 80}/>
                             ))}
                         </div>
 
                         <div style={p.divider}/>
-                        <div style={p.sectionLabel}>Overall Severity</div>
-                        <div style={p.overallBlock}>
-                            <div style={{ ...p.overallScore, color: sevColor }}>
-                                {overallSev !== null ? Math.round(overallSev * 100) : '—'}
-                            </div>
-                            <div style={p.overallMeta}>
-                                <div style={{ ...p.overallLabel, color: sevColor }}>{sevText}</div>
-                                <div style={p.overallSub}>composite risk score</div>
-                            </div>
-                            <div style={p.overallBar}>
-                                <div style={{ ...p.overallFill, width: overallSev !== null ? `${overallSev * 100}%` : '0%', background:`linear-gradient(90deg,${sevColor}66,${sevColor})`, boxShadow:`0 0 12px ${sevColor}55` }}/>
-                            </div>
+                        <div style={p.sectionLabel}>Scores</div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            {/* Overall severity — less intrusive, on top */}
+                            <BigScoreBlock
+                                label={`${sevText} — Overall Severity`}
+                                score={Math.round(overallSev)}
+                                color={sevColor}
+                                sub="composite crisis score"
+                                prominent={false}
+                            />
+                            {/* Disparity — prominent, below */}
+                            <BigScoreBlock
+                                label="Disparity"
+                                score={disparityVal}
+                                color={disparityColor}
+                                sub="inequality index"
+                                prominent={true}
+                            />
                         </div>
 
                         {country.description && (
@@ -449,7 +413,6 @@ export default function CountryPanel({ country, onClose, allData }) {
     );
 }
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
 const p = {
     overlay:     { position:'fixed', inset:0, zIndex:100, display:'flex', background:'rgba(4,9,20,0.97)', fontFamily:"'DM Sans','Helvetica Neue',sans-serif", backdropFilter:'blur(2px)' },
     left:        { flex:'0 0 48%', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'48px 40px 36px', position:'relative', borderRight:'1px solid rgba(80,140,220,0.1)', background:'radial-gradient(ellipse at 50% 55%, rgba(20,40,80,0.45) 0%, transparent 70%)', gap:'14px' },
@@ -466,12 +429,5 @@ const p = {
     statsGrid:   { display:'grid', gridTemplateColumns:'1fr 1fr', gap:'8px' },
     divider:     { height:'1px', background:'rgba(80,140,220,0.07)', margin:'2px 0' },
     barsBlock:   { display:'flex', flexDirection:'column', gap:'14px' },
-    overallBlock:{ display:'flex', alignItems:'center', gap:'20px', padding:'16px', background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.05)', borderRadius:'10px', flexWrap:'wrap' },
-    overallScore:{ fontSize:'3.5rem', fontWeight:800, lineHeight:1, letterSpacing:'-0.04em' },
-    overallMeta: { flex:1, display:'flex', flexDirection:'column', gap:'2px' },
-    overallLabel:{ fontSize:'1rem', fontWeight:700, letterSpacing:'0.04em', textTransform:'uppercase' },
-    overallSub:  { fontSize:'0.65rem', color:'#2a4a62', letterSpacing:'0.08em' },
-    overallBar:  { width:'100%', height:'5px', background:'rgba(255,255,255,0.04)', borderRadius:'3px', overflow:'hidden' },
-    overallFill: { height:'100%', borderRadius:'3px', transition:'width 1s cubic-bezier(0.22,1,0.36,1) 0.3s' },
     description: { margin:0, fontSize:'0.82rem', color:'#6a8aa4', lineHeight:1.7 },
 };
