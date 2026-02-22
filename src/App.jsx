@@ -42,36 +42,39 @@ export default function App() {
     }
 
     return (
-        <div className="app-layout">
-            <Controls
-                category={category}
-                onCategoryChange={setCategory}
-                onDataLoad={(d) => setData(d)}
-                rowCount={data.length}
-            />
-            <main className="globe-container">
-                {loading ? (
-                    <div className="loading-screen">
-                        <div className="spinner" />
-                        <p>Loading globe data…</p>
-                    </div>
-                ) : (
-                    <Globe
-                        data={data}
-                        category={category}
-                        onCountryClick={setSelectedCountry}
+        <>
+            <div className="app-layout">
+                <Controls
+                    category={category}
+                    onCategoryChange={setCategory}
+                    onDataLoad={(d) => setData(d)}
+                    rowCount={data.length}
+                />
+                <main className="globe-container">
+                    {loading ? (
+                        <div className="loading-screen">
+                            <div className="spinner" />
+                            <p>Loading globe data…</p>
+                        </div>
+                    ) : (
+                        <Globe
+                            data={data}
+                            category={category}
+                            onCountryClick={setSelectedCountry}
+                        />
+                    )}
+                </main>
+
+                {selectedCountry && (
+                    <CountryPanel
+                        country={selectedCountry}
+                        onClose={() => setSelectedCountry(null)}
+                        allData={data}
                     />
                 )}
-            </main>
-            <Legend category={category} />
+            </div>
 
-            {/* Country detail panel slides in to the right of the globe */}
-            {selectedCountry && (
-                <CountryPanel
-                    country={selectedCountry}
-                    onClose={() => setSelectedCountry(null)}
-                />
-            )}
-        </div>
+            <Legend category={category} />
+        </>
     );
 }
