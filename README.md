@@ -1,4 +1,4 @@
-# 🌍 World Crisis Globe
+# 🌍 VidePax
 
 An interactive 3D globe that visualizes current global challenges as a heatmap, powered by real-world CSV data.
 
