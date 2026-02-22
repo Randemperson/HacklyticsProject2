@@ -51,8 +51,8 @@ const CATEGORY_INFO = {
         source: 'OCHA FTS 2024',
     },
     disparity: {
-        title: 'Inequality & Disparity',
-        description: 'Measures inequality in income, access to services, gender, and regional development gaps.',
+        title: 'Funding Disparity',
+        description: 'Measures inequality between funding needed and funding received',
         source: 'UNDP Human Development Report 2024',
     },
     overall: {

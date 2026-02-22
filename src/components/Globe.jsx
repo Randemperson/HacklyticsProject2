@@ -1,16 +1,59 @@
 import { useEffect, useRef, useState } from 'react';
 
+// Maps CSV country names → canonical key (normalized CSV name stays as-is)
+// Maps GeoJSON ADMIN names → CSV key so matchCountry can find CSV-keyed map entries
+// Both directions live here so one function handles all lookups.
+const GEOJSON_TO_CSV = {
+  'democratic republic of the congo':    'democratic republic of congo',
+  'republic of congo':                   'congo (republic)',
+  "côte d'ivoire":                       'ivory coast',
+  'united states of america':            'united states',
+  'russian federation':                  'russia',
+  'republic of korea':                   'south korea',
+  'dem. rep. korea':                     'north korea',
+  'syrian arab republic':                'syria',
+  'islamic republic of iran':            'iran',
+  'united republic of tanzania':         'tanzania',
+  'plurinational state of bolivia':      'bolivia',
+  'bolivarian republic of venezuela':    'venezuela',
+  'viet nam':                            'vietnam',
+  "lao people's democratic republic":    'laos',
+  'republic of moldova':                 'moldova',
+  'macedonia':                           'north macedonia',
+  'swaziland':                           'eswatini',
+  'cape verde':                          'cabo verde',
+  'east timor':                          'timor-leste',
+  'türkiye':                             'turkey',
+  'czech republic':                      'czechia',
+  'brunei darussalam':                   'brunei',
+  'são tomé and príncipe':               'sao tome and principe',
+  'guinea-bissau':                       'guinea bissau',
+  'myanmar (burma)':                     'myanmar',
+};
+
+// Normalize: lowercase + collapse whitespace only — NO aliasing.
+// Maps are keyed by raw CSV names so CountryPanel lookups stay consistent.
+function normName(name) {
+  return (name ?? '').trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+// Resolve a GeoJSON candidate name to the key used in the severity map.
+function resolveGeoName(candidate) {
+  const n = normName(candidate);
+  return GEOJSON_TO_CSV[n] ?? n;
+}
+
+// ─── Color functions ──────────────────────────────────────────────────────────
+
 function severityColor(t, alpha = 0.85) {
   if (t === null || t === undefined) return `rgba(60,90,120,${alpha})`;
   t = Math.max(0, Math.min(1, t));
-
   const stops = [
-    [20,  40,  70 ],
-    [230, 210, 0  ],
-    [240, 100, 0  ],
-    [200, 0,   0  ],
+    [20,  40,  70],
+    [230, 210,  0],
+    [240, 100,  0],
+    [200,   0,  0],
   ];
-
   const scaled = t * (stops.length - 1);
   const i = Math.min(Math.floor(scaled), stops.length - 2);
   const f = scaled - i;
@@ -22,13 +65,11 @@ function severityColor(t, alpha = 0.85) {
 function fundingColor(t, alpha = 0.85) {
   if (t === null || t === undefined) return `rgba(60,90,120,${alpha})`;
   t = Math.max(0, Math.min(1, t));
-
   const stops = [
-    [20,  40,  70 ],
-    [0,   180, 100],
-    [0,   220, 60 ],
+    [20,  40,  70],
+    [0,  180, 100],
+    [0,  220,  60],
   ];
-
   const scaled = t * (stops.length - 1);
   const i = Math.min(Math.floor(scaled), stops.length - 2);
   const f = scaled - i;
@@ -57,30 +98,30 @@ function categoryLabel(cat) {
   return labels[cat] || cat;
 }
 
+// ─── Build severity maps keyed by raw normalized CSV country names ─────────────
+
 function buildSeverityMap(data, category) {
   const map = {};
   data
       .filter((d) => d.category === category)
       .forEach((d) => {
-        map[d.country?.trim().toLowerCase()] = Math.max(0, Math.min(1, Number(d.value) / 100));
+        const key = normName(d.country);
+        if (key) map[key] = Math.max(0, Math.min(1, Number(d.value) / 100));
       });
   return map;
 }
 
 function buildAverageSeverityMap(data) {
-  // funding is excluded from the composite average
   const CATEGORY_KEYS = ['conflict', 'climate', 'food_insecurity', 'poverty', 'disease'];
   const totals = {};
-
   data.forEach((d) => {
     if (!CATEGORY_KEYS.includes(d.category)) return;
-    const key = d.country?.trim().toLowerCase();
+    const key = normName(d.country);
     if (!key) return;
     const val = Math.max(0, Math.min(1, Number(d.value) / 100));
     if (!totals[key]) totals[key] = {};
     totals[key][d.category] = val;
   });
-
   const map = {};
   for (const key in totals) {
     const sum = CATEGORY_KEYS.reduce((s, cat) => s + (totals[key][cat] ?? 0), 0);
@@ -89,6 +130,8 @@ function buildAverageSeverityMap(data) {
   return map;
 }
 
+// Match GeoJSON feature → severity map value.
+// Tries the raw GeoJSON name first, then resolves via GEOJSON_TO_CSV alias.
 function matchCountry(properties, severityMap) {
   const candidates = [
     properties.ADMIN,
@@ -96,11 +139,13 @@ function matchCountry(properties, severityMap) {
     properties.NAME_LONG,
     properties.ISO_A2,
     properties.ISO_A3,
-  ]
-      .filter(Boolean)
-      .map((s) => s.trim().toLowerCase());
+  ].filter(Boolean);
+
   for (const c of candidates) {
-    if (severityMap[c] !== undefined) return severityMap[c];
+    const raw      = normName(c);
+    const resolved = resolveGeoName(c);
+    if (severityMap[raw]      !== undefined) return severityMap[raw];
+    if (severityMap[resolved] !== undefined) return severityMap[resolved];
   }
   return null;
 }
@@ -109,11 +154,11 @@ const GEOJSON_URL =
     'https://raw.githubusercontent.com/vasturiano/globe.gl/master/example/datasets/ne_110m_admin_0_countries.geojson';
 
 export default function Globe({ data, category, onCountryClick }) {
-  const containerRef   = useRef(null);
-  const globeRef       = useRef(null);
-  const [globeReady, setGlobeReady]             = useState(false);
-  const [countriesGeoJson, setCountriesGeoJson] = useState(null);
-  const [hoveredCountry, setHoveredCountry]     = useState(null);
+  const containerRef = useRef(null);
+  const globeRef     = useRef(null);
+  const [globeReady,        setGlobeReady]        = useState(false);
+  const [countriesGeoJson,  setCountriesGeoJson]  = useState(null);
+  const [hoveredCountry,    setHoveredCountry]    = useState(null);
 
   const fromMapRef    = useRef({});
   const toMapRef      = useRef({});
@@ -122,7 +167,6 @@ export default function Globe({ data, category, onCountryClick }) {
   const progressRef   = useRef(1);
   const categoryRef   = useRef(category);
 
-  // Keep categoryRef in sync so applyColors closure always has latest value
   useEffect(() => { categoryRef.current = category; }, [category]);
 
   useEffect(() => {
@@ -184,11 +228,14 @@ export default function Globe({ data, category, onCountryClick }) {
   useEffect(() => {
     if (!globeReady || !globeRef.current || !countriesGeoJson) return;
 
-    const newMap = category
-        ? buildSeverityMap(data, category)
-        : buildAverageSeverityMap(data);
+    // Always build average map as fallback for countries missing from the selected category
+    const avgMap = buildAverageSeverityMap(data);
+    const catMap = category ? buildSeverityMap(data, category) : avgMap;
 
-    // Snapshot current interpolated state as the "from" map
+    // Merge: category map takes priority; avgMap fills in countries with no category data
+    const newMap = { ...avgMap, ...catMap };
+
+    // Snapshot current blended state as "from"
     const snapshot = {};
     if (progressRef.current < 1) {
       const prog = progressRef.current;
@@ -226,8 +273,7 @@ export default function Globe({ data, category, onCountryClick }) {
             if (tFrom === null && tTo === null) return NO_DATA_COLOR;
             const tA = tFrom ?? tTo;
             const tB = tTo   ?? tFrom;
-            const t  = tA + (tB - tA) * progress;
-            return pickColor(cat, t);
+            return pickColor(cat, tA + (tB - tA) * progress);
           })
           .polygonSideColor((d) => {
             if (d === hoveredCountry) return 'rgba(255,255,180,0.5)';
@@ -236,8 +282,7 @@ export default function Globe({ data, category, onCountryClick }) {
             if (tFrom === null && tTo === null) return 'rgba(60,90,120,0.2)';
             const tA = tFrom ?? tTo;
             const tB = tTo   ?? tFrom;
-            const t  = tA + (tB - tA) * progress;
-            return pickColor(cat, t, 0.4);
+            return pickColor(cat, tA + (tB - tA) * progress, 0.4);
           })
           .polygonsData([...countriesGeoJson]);
     }
@@ -260,18 +305,19 @@ export default function Globe({ data, category, onCountryClick }) {
         .polygonStrokeColor(() => 'rgba(255,255,255,0.08)')
         .polygonLabel((d) => {
           const { properties: pp } = d;
-          const countryRows = data.filter((row) =>
-              [pp.ADMIN, pp.NAME, pp.NAME_LONG]
-                  .filter(Boolean)
-                  .map((s) => s.trim().toLowerCase())
-                  .includes(row.country?.trim().toLowerCase())
-          );
+          // Use resolveGeoName so aliased countries (Venezuela, etc.) get their rows
+          const countryRows = data.filter((row) => {
+            const rn = normName(row.country);
+            return [pp.ADMIN, pp.NAME, pp.NAME_LONG].filter(Boolean).some(c =>
+                rn === normName(c) || rn === resolveGeoName(c)
+            );
+          });
           let detailHtml = '';
           if (category) {
             const row = countryRows.find((r) => r.category === category);
             detailHtml = row
                 ? `<span style="color:#ffd700;">${categoryLabel(category)}</span>: <b>${row.value}</b>/100<br/>
-                   <span style="opacity:0.8;font-size:11px;">${row.description || ''}</span>`
+               <span style="opacity:0.8;font-size:11px;">${row.description || ''}</span>`
                 : `<span style="opacity:0.5;">No data for this category</span>`;
           } else {
             detailHtml = countryRows.length
@@ -283,10 +329,10 @@ export default function Globe({ data, category, onCountryClick }) {
                 : `<span style="opacity:0.5;">No data available</span>`;
           }
           return `<div style="background:rgba(0,0,0,0.88);color:#e8eaf0;padding:10px 13px;border-radius:7px;font-family:sans-serif;font-size:13px;max-width:250px;pointer-events:none;border:1px solid rgba(255,255,255,0.08);">
-            <b style="font-size:14px;display:block;margin-bottom:5px;">${pp.ADMIN}</b>
-            ${detailHtml}
-            <span style="display:block;margin-top:6px;opacity:0.35;font-size:10px;">Click to explore</span>
-          </div>`;
+          <b style="font-size:14px;display:block;margin-bottom:5px;">${pp.ADMIN}</b>
+          ${detailHtml}
+          <span style="display:block;margin-top:6px;opacity:0.35;font-size:10px;">Click to explore</span>
+        </div>`;
         })
         .polygonsTransitionDuration(400)
         .onPolygonHover((hoverD) => setHoveredCountry(hoverD || null))
@@ -298,10 +344,9 @@ export default function Globe({ data, category, onCountryClick }) {
               ? data.find(
                   (row) =>
                       row.category === category &&
-                      [pp.ADMIN, pp.NAME, pp.NAME_LONG]
-                          .filter(Boolean)
-                          .map((s) => s.trim().toLowerCase())
-                          .includes(row.country?.trim().toLowerCase())
+                      [pp.ADMIN, pp.NAME, pp.NAME_LONG].filter(Boolean).some(c =>
+                          normName(row.country) === normName(c) || normName(row.country) === resolveGeoName(c)
+                      )
               )
               : null;
           onCountryClick({
