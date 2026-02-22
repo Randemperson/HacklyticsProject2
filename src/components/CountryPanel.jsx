@@ -6,6 +6,7 @@ const CATEGORIES = [
     { key: 'food_insecurity', label: 'Food Insecurity', color: '#e07830' },
     { key: 'poverty',         label: 'Poverty',         color: '#a055c0' },
     { key: 'disease',         label: 'Disease Burden',  color: '#30a860' },
+    { key: 'funding',         label: 'Funding',         color: '#2ecc71' },
 ];
 
 function severityLabel(t) {
@@ -401,16 +402,20 @@ export default function CountryPanel({ country, onClose, allData }) {
 
                         <div style={p.sectionLabel}>Overview</div>
                         <div style={p.statsGrid}>
-                            <StatCard label="Population"   value={population}  />
-                            <StatCard label="GDP"          value={gdp}         />
-                            <StatCard label="Area"         value={area}        />
-                            <StatCard label="Income Group" value={incomeGroup} sub={economy || undefined}/>
+                            <StatCard label="Population" value={population} />
+                            <StatCard label="GDP"        value={gdp}        />
+                            <StatCard label="Area"       value={area}       />
+                            <StatCard label="Funding"    value={
+                                categoryValues['funding'] !== null && categoryValues['funding'] !== undefined
+                                    ? `${categoryValues['funding']}/100`
+                                    : 'N/A'
+                            } />
                         </div>
 
                         <div style={p.divider}/>
                         <div style={p.sectionLabel}>Crisis Indices</div>
                         <div style={p.barsBlock}>
-                            {CATEGORIES.map((cat, i) => (
+                            {CATEGORIES.filter(cat => cat.key !== 'funding').map((cat, i) => (
                                 <SeverityBar key={cat.key} label={cat.label} value={categoryValues[cat.key]} color={cat.color} delay={i * 80}/>
                             ))}
                         </div>

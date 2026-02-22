@@ -9,6 +9,8 @@ const CATEGORIES = [
   { key: 'disease',         label: 'Disease',       color: '#30a860' },
 ];
 
+const FUNDING_CATEGORY = { key: 'funding', label: 'Funding', color: '#2ecc71' };
+
 export default function Controls({ category, onCategoryChange, onDataLoad, rowCount }) {
   const [hoveredKey, setHoveredKey] = useState(null);
 
@@ -27,6 +29,76 @@ export default function Controls({ category, onCategoryChange, onDataLoad, rowCo
     onCategoryChange(category === key ? null : key);
   }
 
+  function renderCatButton(cat) {
+    const active  = category === cat.key;
+    const hovered = hoveredKey === cat.key;
+    let borderLeftColor = 'transparent';
+    if (active) borderLeftColor = cat.color;
+    else if (hovered) borderLeftColor = 'rgba(255,255,255,0.3)';
+
+    return (
+        <button
+            key={cat.key}
+            onClick={() => handleCategoryClick(cat.key)}
+            onMouseEnter={() => setHoveredKey(cat.key)}
+            onMouseLeave={() => setHoveredKey(null)}
+            style={{
+              ...s.catBtn,
+              borderLeftColor,
+              ...(active ? {
+                color: '#f0f4f8',
+                background: `linear-gradient(90deg, ${cat.color}22 0%, ${cat.color}08 100%)`,
+              } : {}),
+            }}
+        >
+        <span style={{
+          ...s.catIndicator,
+          background: active ? cat.color : 'rgba(255,255,255,0.1)',
+          boxShadow: active ? `0 0 6px ${cat.color}88` : 'none',
+        }} />
+          <span style={s.catText}>{cat.label}</span>
+          {active && <span style={s.activeTag}>SELECTED</span>}
+        </button>
+    );
+  }
+
+  function renderFundingButton() {
+    const cat    = FUNDING_CATEGORY;
+    const active  = category === cat.key;
+    const hovered = hoveredKey === cat.key;
+    let borderLeftColor = 'transparent';
+    if (active) borderLeftColor = cat.color;
+    else if (hovered) borderLeftColor = 'rgba(46,204,113,0.35)';
+
+    return (
+        <button
+            key={cat.key}
+            onClick={() => handleCategoryClick(cat.key)}
+            onMouseEnter={() => setHoveredKey(cat.key)}
+            onMouseLeave={() => setHoveredKey(null)}
+            style={{
+              ...s.catBtn,
+              borderLeftColor,
+              background: active
+                  ? `linear-gradient(90deg, ${cat.color}22 0%, ${cat.color}08 100%)`
+                  : 'rgba(46,204,113,0.03)',
+              color: active ? '#f0f4f8' : '#4a9a6a',
+            }}
+        >
+        <span style={{
+          ...s.catIndicator,
+          background: active ? cat.color : 'rgba(46,204,113,0.25)',
+          boxShadow: active ? `0 0 6px ${cat.color}88` : 'none',
+        }} />
+          <span style={s.catText}>{cat.label}</span>
+          {active
+              ? <span style={s.activeTag}>SELECTED</span>
+              : <span style={s.fundingTag}>$</span>
+          }
+        </button>
+    );
+  }
+
   return (
       <aside style={s.panel}>
 
@@ -43,39 +115,11 @@ export default function Controls({ category, onCategoryChange, onDataLoad, rowCo
         <div style={s.section}>
           <div style={s.label}>VIEW BY</div>
           <div style={s.categoryList}>
-            {CATEGORIES.map((cat) => {
-              const active = category === cat.key;
-              const hovered = hoveredKey === cat.key;
+            {CATEGORIES.map(renderCatButton)}
 
-              let borderLeftColor = 'transparent';
-              if (active) borderLeftColor = cat.color;
-              else if (hovered) borderLeftColor = 'rgba(255,255,255,0.3)';
-
-              return (
-                  <button
-                      key={cat.key}
-                      onClick={() => handleCategoryClick(cat.key)}
-                      onMouseEnter={() => setHoveredKey(cat.key)}
-                      onMouseLeave={() => setHoveredKey(null)}
-                      style={{
-                        ...s.catBtn,
-                        borderLeftColor,
-                        ...(active ? {
-                          color: '#f0f4f8',
-                          background: `linear-gradient(90deg, ${cat.color}22 0%, ${cat.color}08 100%)`,
-                        } : {}),
-                      }}
-                  >
-                <span style={{
-                  ...s.catIndicator,
-                  background: active ? cat.color : 'rgba(255,255,255,0.1)',
-                  boxShadow: active ? `0 0 6px ${cat.color}88` : 'none',
-                }} />
-                    <span style={s.catText}>{cat.label}</span>
-                    {active && <span style={s.activeTag}>SELECTED</span>}
-                  </button>
-              );
-            })}
+            {/* Funding — separated with a subtle divider */}
+            <div style={s.fundingDivider} />
+            {renderFundingButton()}
           </div>
           {category === null && (
               <p style={s.overallNote}>Showing overall average severity</p>
@@ -221,6 +265,20 @@ const s = {
     background: 'rgba(255,255,255,0.06)',
     borderRadius: '3px',
     padding: '2px 5px',
+  },
+  fundingDivider: {
+    height: '1px',
+    background: 'rgba(46,204,113,0.1)',
+    margin: '4px 4px',
+  },
+  fundingTag: {
+    fontSize: '0.6rem',
+    fontWeight: 700,
+    letterSpacing: '0.05em',
+    color: 'rgba(46,204,113,0.45)',
+    background: 'rgba(46,204,113,0.08)',
+    borderRadius: '3px',
+    padding: '2px 6px',
   },
   overallNote: {
     margin: '4px 0 0',
