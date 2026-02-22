@@ -1,11 +1,11 @@
 import Papa from 'papaparse';
 
 const CATEGORIES = [
-  { key: 'conflict', label: '⚔️ Conflict', color: '#e74c3c' },
-  { key: 'climate', label: '🌡️ Climate', color: '#f39c12' },
-  { key: 'food_insecurity', label: '🌾 Food', color: '#e67e22' },
-  { key: 'poverty', label: '💰 Poverty', color: '#9b59b6' },
-  { key: 'disease', label: '🦠 Disease', color: '#27ae60' },
+  { key: 'conflict', label: 'Conflict', color: '#e74c3c' },
+  { key: 'climate', label: 'Climate', color: '#f39c12' },
+  { key: 'food_insecurity', label: 'Food', color: '#e67e22' },
+  { key: 'poverty', label: 'Poverty', color: '#9b59b6' },
+  { key: 'disease', label: 'Disease', color: '#27ae60' },
 ];
 
 export default function Controls({ category, onCategoryChange, onDataLoad, rowCount }) {
@@ -25,7 +25,7 @@ export default function Controls({ category, onCategoryChange, onDataLoad, rowCo
 
   return (
     <aside className="controls-panel">
-      <h1 className="app-title">🌍 World Crisis Globe</h1>
+      <h1 className="app-title">World Crisis Globe</h1>
       <p className="app-subtitle">
         Interactive heatmap of global challenges
       </p>
