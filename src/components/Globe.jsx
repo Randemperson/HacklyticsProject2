@@ -78,8 +78,26 @@ function fundingColor(t, alpha = 0.85) {
   return `rgba(${Math.round(r1+(r2-r1)*f)},${Math.round(g1+(g2-g1)*f)},${Math.round(b1+(b2-b1)*f)},${alpha})`;
 }
 
+function disparityColor(t, alpha = 0.85) {
+  if (t === null || t === undefined) return `rgba(60,90,120,${alpha})`;
+  t = Math.max(0, Math.min(1, t));
+  const stops = [
+    [20,  40,  70],
+    [100, 50, 200],
+    [155, 80, 255],
+  ];
+  const scaled = t * (stops.length - 1);
+  const i = Math.min(Math.floor(scaled), stops.length - 2);
+  const f = scaled - i;
+  const [r1, g1, b1] = stops[i];
+  const [r2, g2, b2] = stops[i + 1];
+  return `rgba(${Math.round(r1+(r2-r1)*f)},${Math.round(g1+(g2-g1)*f)},${Math.round(b1+(b2-b1)*f)},${alpha})`;
+}
+
 function pickColor(category, t, alpha) {
-  return category === 'funding' ? fundingColor(t, alpha) : severityColor(t, alpha);
+  if (category === 'funding')   return fundingColor(t, alpha);
+  if (category === 'disparity') return disparityColor(t, alpha);
+  return severityColor(t, alpha);
 }
 
 const NO_DATA_COLOR = 'rgba(60,90,120,0.6)';
@@ -126,6 +144,18 @@ function buildAverageSeverityMap(data) {
   for (const key in totals) {
     const sum = CATEGORY_KEYS.reduce((s, cat) => s + (totals[key][cat] ?? 0), 0);
     map[key] = sum / CATEGORY_KEYS.length;
+  }
+  return map;
+}
+
+// Disparity = inverted funding: countries with low funding score highest.
+// Countries with funding = 0 are treated as no data (excluded), not max disparity.
+function buildDisparityMap(data) {
+  const fundingMap = buildSeverityMap(data, 'funding');
+  const map = {};
+  for (const key in fundingMap) {
+    if (fundingMap[key] === 0) continue;
+    map[key] = 1 - fundingMap[key];
   }
   return map;
 }
@@ -228,12 +258,15 @@ export default function Globe({ data, category, onCountryClick }) {
   useEffect(() => {
     if (!globeReady || !globeRef.current || !countriesGeoJson) return;
 
-    // Always build average map as fallback for countries missing from the selected category
     const avgMap = buildAverageSeverityMap(data);
-    const catMap = category ? buildSeverityMap(data, category) : avgMap;
+    const catMap = category === 'disparity'
+      ? buildDisparityMap(data)
+      : category
+        ? buildSeverityMap(data, category)
+        : avgMap;
 
-    // Merge: category map takes priority; avgMap fills in countries with no category data
-    const newMap = { ...avgMap, ...catMap };
+    // Only use catMap when a category is selected — no avgMap fallback bleed
+    const newMap = category ? catMap : avgMap;
 
     // Snapshot current blended state as "from"
     const snapshot = {};

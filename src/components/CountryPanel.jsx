@@ -565,8 +565,9 @@ export default function CountryPanel({ country, onClose, allData }) {
     const region = country.properties?.REGION_WB || country.properties?.SUBREGION || 'N/A';
 
     const overallSev   = CRISIS_KEYS.reduce((sum, k) => sum + (categoryValues[k] ?? 0), 0) / CRISIS_KEYS.length;
-    const disparityVal = categoryValues['disparity'];
     const fundingVal   = categoryValues['funding'];
+    // Disparity = inverse of funding. 0 funding = no data (not max disparity).
+    const disparityVal = (fundingVal !== null && fundingVal > 0) ? Math.round(100 - fundingVal) : null;
 
     const { text: sevText, color: sevColor } = severityLabel(overallSev / 100);
 
