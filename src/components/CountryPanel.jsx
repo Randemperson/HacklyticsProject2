@@ -1,6 +1,6 @@
 import { useMemo, useEffect, useState, useRef, useCallback } from 'react';
 
-const GEMINI_API_KEY = 'AIzaSyCXWJjCBBbV2kMjpbxS68aO4hVCVyaFVqQ';
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
 const CATEGORIES = [
